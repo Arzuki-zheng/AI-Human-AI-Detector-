@@ -58,31 +58,35 @@ if st.button("Analyze Text"):
 
             
             # 5. 顯示結果
-            st.subheader("Analysis Result")
-            
-            # 使用 Columns 顯示大數字
-            col1, col2 = st.columns(2)
-            with col1:
-                st.metric("AI Generated Probability", f"{ai_percent:.1f}%")
-            with col2:
-                st.metric("Human Written Probability", f"{human_percent:.1f}%")
-            
-            # 進度條視覺化
-            st.write("### Confidence Distribution")
-            st.progress(int(ai_percent), text=f"AI Confidence: {ai_percent:.1f}%")
-            
-            # 簡單的長條圖 (選用)
-            chart_data = {"Label": ["AI", "Human"], "Score": [ai_percent, human_percent]}
-            st.bar_chart(chart_data, x="Label", y="Score", color=["#FF4B4B", "#00FF00"])
-
-            # 判斷結論
-            if ai_percent > 60:
-                st.error("🚨 This text is likely **AI-Generated**.")
-            elif human_percent > 60:
-                st.success("✅ This text is likely **Human-Written**.")
-            else:
-                st.info("🤔 The result is **Mixed/Uncertain**.")
-
-# 頁尾
+            # 5. 顯示結果
+                st.subheader("Analysis Result")
+                
+                # 使用 Columns 顯示大數字
+                col1, col2 = st.columns(2)
+                with col1:
+                    st.metric("AI Generated Probability", f"{ai_percent:.1f}%")
+                with col2:
+                    st.metric("Human Written Probability", f"{human_percent:.1f}%")
+                
+                # 進度條視覺化
+                st.write("### Confidence Distribution")
+                st.progress(int(ai_percent)/100, text=f"AI Confidence: {ai_percent:.1f}%")
+                
+                # 簡單的長條圖（修正版）
+                import pandas as pd
+                chart_data = pd.DataFrame({
+                    "Category": ["AI", "Human"], 
+                    "Probability": [ai_percent, human_percent]
+                })
+                st.bar_chart(chart_data, x="Category", y="Probability")
+                
+                # 判斷結論
+                if ai_percent > 60:
+                    st.error("🚨 This text is likely **AI-Generated**.")
+                elif human_percent > 60:
+                    st.success("✅ This text is likely **Human-Written**.")
+                else:
+                    st.info("🤔 The result is **Mixed/Uncertain**.")
+                # 頁尾
 st.markdown("---")
 st.caption("Powered by Hugging Face Transformers & Streamlit | Model: Hello-SimpleAI/chatgpt-detector-roberta")
