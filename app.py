@@ -31,31 +31,31 @@ if st.button("Analyze Text"):
         st.warning("Please enter some text to analyze.")
     else:
         with st.spinner("Analyzing..."):
-            # 3. 執行預測
             classifier = load_model()
-            # 限制輸入長度以免爆顯存 (雖然 RoBERTa 會自動截斷，但手動截斷較安全)
-            results = classifier(user_input[:512])[0] 
-            
-            # 4. 解析結果
-            # 模型輸出通常是 [{'label': 'Human', 'score': 0.9}, {'label': 'ChatGPT', 'score': 0.1}]
-            # 不同模型 label 可能不同 (Real/Fake 或 Human/ChatGPT)，需動態調整
-            
+            outputs = classifier(
+                user_input[:512],
+                truncation=True,
+                max_length=512,
+                return_all_scores=True
+            )
+        
+            results = outputs[0]  # 這裡才取內層 list
+        
             ai_score = 0.0
             human_score = 0.0
-            
+        
             for res in results:
-                label = res['label'].lower()
-                score = res['score']
-                
-                if "chatgpt" in label or "fake" in label or "ai" in label:
+                label = res["label"].lower()
+                score = float(res["score"])
+                if "fake" in label or "ai" in label or "chatgpt" in label:
                     ai_score = score
                 else:
                     human_score = score
-            
-            # 確保總和為 1 (有時候浮點數會有微小誤差)
-            total = ai_score + human_score
-            ai_percent = (ai_score / total) * 100
-            human_percent = (human_score / total) * 100
+        
+            total = ai_score + human_score or 1.0
+            ai_percent = ai_score / total * 100
+            human_percent = human_score / total * 100
+
             
             # 5. 顯示結果
             st.subheader("Analysis Result")
