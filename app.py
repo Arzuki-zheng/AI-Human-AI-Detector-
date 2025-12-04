@@ -15,6 +15,8 @@ def load_model():
 
 # 2. UI 介面設計 (參考 justdone.com 風格)
 st.title("🤖 AI Content Detector")
+st.markdown("AIoT_HW5 Q1 AI/HUMAN 文本辨識器")
+st.markdown("學號:7114056186 姓名:陳鉦元")
 st.markdown("### Check if your text is written by **Human** or **AI**")
 st.markdown("Paste your text below to analyze:")
 
