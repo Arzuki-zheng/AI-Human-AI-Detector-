@@ -7,10 +7,13 @@ st.set_page_config(page_title="AI Text Detector", page_icon="🤖")
 # 1. 載入模型 (使用 @st.cache_resource 避免每次重跑模型)
 @st.cache_resource
 def load_model():
-    # 使用 Hugging Face 上針對 ChatGPT 檢測微調過的 RoBERTa 模型
-    # 備選模型: "openai-community/roberta-base-openai-detector"
-    model_name = "Hello-SimpleAI/chatgpt-detector-roberta"
-    classifier = pipeline("text-classification", model=model_name, return_all_scores=True)
+    # 使用 OpenAI 官方的 RoBERTa 檢測器（更穩定）
+    classifier = pipeline(
+        "text-classification",
+        model="openai-community/roberta-base-openai-detector",
+        truncation=True,
+        max_length=512
+    )
     return classifier
 
 # 2. UI 介面設計 (參考 justdone.com 風格)
