@@ -1,4 +1,5 @@
 import streamlit as st
+import pandas as pd
 from transformers import pipeline
 
 # 設定頁面配置
@@ -19,7 +20,7 @@ def load_model():
 # 2. UI 介面設計 (參考 justdone.com 風格)
 st.title("🤖 AI Content Detector")
 st.markdown("AIoT_HW5 Q1 AI/HUMAN 文本辨識器")
-st.markdown("學號:7114056186 姓名:陳鉦元")
+st.markdown("**學號**: 7114056186  **姓名**: 陳鉦元")
 st.markdown("### Check if your text is written by **Human** or **AI**")
 st.markdown("Paste your text below to analyze:")
 
@@ -31,34 +32,35 @@ if st.button("Analyze Text"):
         st.warning("Please enter some text to analyze.")
     else:
         with st.spinner("Analyzing..."):
-            classifier = load_model()
-            outputs = classifier(
-                user_input[:512],
-                truncation=True,
-                max_length=512,
-                return_all_scores=True
-            )
-        
-            results = outputs[0]  # 這裡才取內層 list
-        
-            ai_score = 0.0
-            human_score = 0.0
-        
-            for res in results:
-                label = res["label"].lower()
-                score = float(res["score"])
-                if "fake" in label or "ai" in label or "chatgpt" in label:
-                    ai_score = score
-                else:
-                    human_score = score
-        
-            total = ai_score + human_score or 1.0
-            ai_percent = ai_score / total * 100
-            human_percent = human_score / total * 100
-
+            try:
+                classifier = load_model()
+                outputs = classifier(
+                    user_input[:512],
+                    truncation=True,
+                    max_length=512,
+                    return_all_scores=True
+                )
             
-            # 5. 顯示結果
-            # 5. 顯示結果
+                results = outputs[0]  # 這裡才取內層 list
+            
+                ai_score = 0.0
+                human_score = 0.0
+            
+                for res in results:
+                    label = res["label"].lower()
+                    score = float(res["score"])
+                    if "fake" in label or "ai" in label or "chatgpt" in label:
+                        ai_score = score
+                    else:
+                        human_score = score
+            
+                # 計算百分比
+                total = ai_score + human_score or 1.0
+                ai_percent = (ai_score / total) * 100
+                human_percent = (human_score / total) * 100
+
+                # 5. 顯示結果
+                st.markdown("---")
                 st.subheader("Analysis Result")
                 
                 # 使用 Columns 顯示大數字
@@ -72,8 +74,7 @@ if st.button("Analyze Text"):
                 st.write("### Confidence Distribution")
                 st.progress(int(ai_percent)/100, text=f"AI Confidence: {ai_percent:.1f}%")
                 
-                # 簡單的長條圖（修正版）
-                import pandas as pd
+                # 簡單的長條圖（已修正）
                 chart_data = pd.DataFrame({
                     "Category": ["AI", "Human"], 
                     "Probability": [ai_percent, human_percent]
@@ -87,6 +88,10 @@ if st.button("Analyze Text"):
                     st.success("✅ This text is likely **Human-Written**.")
                 else:
                     st.info("🤔 The result is **Mixed/Uncertain**.")
-                # 頁尾
+            
+            except Exception as e:
+                st.error(f"An error occurred during analysis: {e}")
+
+# 頁尾
 st.markdown("---")
-st.caption("Powered by Hugging Face Transformers & Streamlit | Model: Hello-SimpleAI/chatgpt-detector-roberta")
+st.caption("Powered by Hugging Face Transformers & Streamlit | Model: openai-community/roberta-base-openai-detector")
